@@ -182,8 +182,32 @@
       text-transform: uppercase;
     }
 
+
+
+
+
+
+        .sound-fab {
+      position: relative;
+      background: rgba(229,107,138,.25); border: 1.5px solid rgba(255,255,255,.9);
+      color: #ffffff; padding: .7rem 1.4rem;
+      cursor: pointer; backdrop-filter: blur(8px);
+      transition: color .35s, border-color .35s, background .35s;
+      display: flex; align-items: center; gap: .6rem;
+      white-space: nowrap;
+    }
+    .sound-fab:hover, .sound-fab:active { border-color: #ffffff; background: rgba(229,107,138,.4); }
+    .sound-fab.active { color: #ffffff; border-color: rgba(255,255,255,.9); }
+    #sound-label {
+      font-family: 'Inter', sans-serif; font-size: .55rem; letter-spacing: .28em;
+      text-transform: uppercase;
+    }
+
+
+
+
     /* ══ AR VIEW ══ */
-    #view-ar { z-index: 20; background: #000 !important; color: #000; }
+    #view-ar { position: fixed; inset: 0; z-index: 20; background: #000; color: #ffffff; }
 
     #ar-video {
       position: absolute; inset: 0;
@@ -357,7 +381,6 @@
 
 
 <script>
-/* ══ AFFIRMATIONS ══ */
 /* ══ AFFIRMATIONS ══ */
 const affirmations = [
   "I am the light I seek.",
@@ -611,7 +634,6 @@ function openAR() {
   document.getElementById('view-affirmation').classList.add('hidden');
   document.getElementById('view-ar').classList.remove('hidden');
   startHeartbeat();
-  startCamera(); // start immediately, show permission screen only if needed
 }
 
 function closeAR() {
@@ -656,8 +678,8 @@ function initARCanvas() {
   }
   window.addEventListener('resize', resize); resize();
 
-  const G  = (a) => `rgba(255,255,255,${a})`;
-  const WH = (a) => `rgba(255,255,255,${a})`;
+  const G  = (a) => `rgba(229,107,138,${a})`;
+  const WH = (a) => `rgba(255,180,210,${a})`;
 
   /* ── Floating particles ── */
   const particles = [];
@@ -831,6 +853,7 @@ function initARCanvas() {
   }
   loop();
 }
+
 </script>
 </body>
 </html>
