@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Light & Energy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #e56b8a;
+      --gold-light: #f5a0b8;
+      --gold-dim: #c04f72;
+      --cream: #2a0818;
+      --deep: #f5dce5;
+    }
+    html, body {
+      height: 100%; background: var(--deep); color: var(--cream);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden; -webkit-tap-highlight-color: transparent; user-select: none;
+    }
+
+    .view { position: fixed; inset: 0; transition: opacity 0.8s ease; }
+    .view.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
+
+    /* ══ AFFIRMATION VIEW ══ */
+    #view-affirmation { z-index: 10; }
+
+    .bg { position: absolute; inset: 0; }
+    .bg-gradient {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 30%,
+        rgba(229,107,138,.15) 0%, rgba(245,180,200,.3) 60%, var(--deep) 100%);
+    }
+    .center-glow {
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 22% 22% at 50% 48%,
+        rgba(255,255,255,0.92) 0%,
+        rgba(255,255,255,0.50) 30%,
+        rgba(255,255,255,0.15) 60%,
+        transparent 75%);
+    }
+    .warm-glow {
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 60% 50% at 50% 48%,
+        rgba(229, 107, 138, 0.55) 0%,
+        rgba(229, 107, 138, 0.28) 40%,
+        transparent 72%);
+    }
+    .bg-noise {
+      position: absolute; inset: 0; opacity: .04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+    .orb-wrap { position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    .orb {
+      width: min(70vw,70vh); height: min(70vw,70vh); border-radius: 50%;
+      background: radial-gradient(circle at 48% 48%,
+        rgba(80,10,35,.55) 0%,
+        rgba(100,15,45,.45) 25%,
+        rgba(130,20,55,.30) 50%,
+        rgba(160,30,70,.12) 70%,
+        transparent 88%);
+      box-shadow: 0 0 80px 40px rgba(229,107,138,.55), 0 0 160px 80px rgba(229,107,138,.35), 0 0 280px 120px rgba(229,107,138,.18);
+      animation: orbPulse 6s ease-in-out infinite;
+    }
+    @keyframes orbPulse { 0%,100%{transform:scale(1);opacity:.7} 50%{transform:scale(1.08);opacity:1} }
+
+    .rays-svg { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    .rays-svg svg { width:min(100vw,100vh); height:min(100vw,100vh); opacity:.55; animation:raysSpin 60s linear infinite; }
+    @keyframes raysSpin { to{transform:rotate(360deg)} }
+
+    #aff-canvas { position:absolute; inset:0; }
+
+    .corner { position:absolute; width:40px; height:40px; opacity:.25; }
+    .corner svg { width:100%; height:100%; }
+    .corner.tl{top:1.5rem;left:1.5rem}
+    .corner.tr{top:1.5rem;right:1.5rem;transform:scaleX(-1)}
+    .corner.bl{bottom:3rem;left:1.5rem;transform:scaleY(-1)}
+    .corner.br{bottom:3rem;right:1.5rem;transform:scale(-1)}
+
+    .stage {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 0 2rem;
+      padding-bottom: calc(5vh - 8px);
+    }
+    .eyebrow {
+      font-family:'Inter',sans-serif; font-size:clamp(.55rem,1.8vw,.75rem);
+      font-weight:300; letter-spacing:.35em; color:rgba(42,8,24,.7);
+      text-transform:uppercase; margin-bottom:.4rem; margin-top:0;
+      opacity:0; animation:fadeUp 1.8s ease .3s forwards;
+    }
+    .divider {
+      width:1px; height:48px;
+      background:linear-gradient(to bottom,transparent,rgba(229,107,138,.8),transparent);
+      margin:0 auto 2.5rem; opacity:0; animation:fadeUp 1.8s ease .5s forwards;
+    }
+    .affirmation-box {
+      width: min(58vw, 58vh);
+      max-width: min(58vw, 58vh);
+      min-height: 4rem;
+      display:flex; align-items:center; justify-content:center;
+      position: relative;
+    }
+    #aff-glow {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      transition: width 0.6s ease, height 0.6s ease;
+      background: radial-gradient(ellipse 60% 50% at 50% 50%,
+        rgba(255,255,255,0.32) 0%,
+        rgba(255,255,255,0.14) 40%,
+        transparent 75%);
+    }
+    .affirmation-box p { position: relative; z-index: 1; }
+    .headlines {
+      position: absolute; top: 2.5rem; left: 0; right: 0;
+      display: flex; flex-direction: column; align-items: center;
+      z-index: 11;
+    }
+    .eyebrow-sub {
+      font-family:'Inter',sans-serif; font-style:italic; font-size:clamp(.8rem,2.5vw,1rem);
+      font-weight:300; color:rgba(229,107,138,0.7); letter-spacing:.15em;
+      margin-top:-.5rem; margin-bottom:0;
+      opacity:0; animation:fadeUp 1.8s ease .5s forwards;
+    }
+    #affirmation {
+      font-weight:300; font-style:italic;
+      font-size: clamp(1rem, 4.2vw, 2.2rem);
+      line-height:1.6; color:#2a0818; letter-spacing:.01em;
+      word-break:keep-all; overflow-wrap:break-word; hyphens:none;
+      width: 100%;
+      text-align: center;
+      text-shadow: 0 0 40px rgba(229,107,138,0.7), 0 0 80px rgba(255,120,170,0.4), 0 0 120px rgba(220,80,140,0.2);
+      transition:opacity 1.2s ease, transform 1.2s ease;
+    }
+    #affirmation.fade-out  { opacity:0; transform:translateY(-12px); }
+    #affirmation.fade-in   { opacity:1; transform:translateY(0); }
+    #affirmation.hidden    { opacity:0; transform:translateY(12px); }
+    .divider2 { width:1px; height:80px; background:linear-gradient(to bottom,transparent,rgba(229,107,138,.8),transparent); margin:0; opacity:0; animation:fadeUp 1.8s ease .7s forwards; }
+    .bottom-btns {
+      position: absolute;
+      bottom: 4.5rem; left: 0; right: 0; top: auto;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px;
+      opacity:0; animation:fadeUp 1.8s ease 1s forwards;
+      z-index: 15;
+    }
+    .ar-btn-fixed {
+      background: rgba(229,107,138,.25); border: 1.5px solid rgba(255,255,255,.9); color: #ffffff;
+      font-family:'Inter',sans-serif; font-size:clamp(.55rem,1.8vw,.72rem); font-weight:400;
+      letter-spacing:.2em; text-transform:uppercase; padding:.7rem 1.6rem;
+      cursor:pointer; transition:background .3s, border-color .3s;
+      display:flex; align-items:center; gap:.6rem; white-space:nowrap;
+      backdrop-filter: blur(8px);
+    }
+    .ar-btn-fixed:hover,.ar-btn-fixed:active { border-color:#ffffff; }
+
+    .ar-btn svg { width:18px; height:18px; flex-shrink:0; }
+
+    .daily-hint {
+      font-family: 'Inter', sans-serif; font-size: .55rem; letter-spacing: .22em;
+      text-transform: uppercase; color: rgba(42,8,24,.4);
+      margin-top: .2rem; text-align: center;
+      opacity: 0; animation: fadeUp 1.8s ease 1.2s forwards;
+    }
+    .footer {
+      position:absolute; bottom:env(safe-area-inset-bottom,1.5rem); left:0; right:0;
+      text-align:center; font-family:'Inter',sans-serif; font-size:clamp(.45rem,1.4vw,.6rem);
+      letter-spacing:.25em; color:rgba(42,8,24,.3); text-transform:uppercase; padding-bottom:1.2rem;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+
+
+    .sound-fab {
+      position: relative;
+      background: rgba(229,107,138,.25); border: 1.5px solid rgba(255,255,255,.9);
+      color: #ffffff; padding: .7rem 1.4rem;
+      cursor: pointer; backdrop-filter: blur(8px);
+      transition: color .35s, border-color .35s, background .35s;
+      display: flex; align-items: center; gap: .6rem;
+      white-space: nowrap;
+    }
+    .sound-fab:hover, .sound-fab:active { border-color: #ffffff; background: rgba(229,107,138,.4); }
+    .sound-fab.active { color: #ffffff; border-color: rgba(255,255,255,.9); }
+    #sound-label {
+      font-family: 'Inter', sans-serif; font-size: .55rem; letter-spacing: .28em;
+      text-transform: uppercase;
+    }
+
+
+
+
+
+
+        .sound-fab {
+      position: relative;
+      background: rgba(229,107,138,.25); border: 1.5px solid rgba(255,255,255,.9);
+      color: #ffffff; padding: .7rem 1.4rem;
+      cursor: pointer; backdrop-filter: blur(8px);
+      transition: color .35s, border-color .35s, background .35s;
+      display: flex; align-items: center; gap: .6rem;
+      white-space: nowrap;
+    }
+    .sound-fab:hover, .sound-fab:active { border-color: #ffffff; background: rgba(229,107,138,.4); }
+    .sound-fab.active { color: #ffffff; border-color: rgba(255,255,255,.9); }
+    #sound-label {
+      font-family: 'Inter', sans-serif; font-size: .55rem; letter-spacing: .28em;
+      text-transform: uppercase;
+    }
+
+
+
+
+    /* ══ AR VIEW ══ */
+    #view-ar { position: fixed; inset: 0; z-index: 20; background: #000; color: #ffffff; }
+
+    #ar-video {
+      position: absolute; inset: 0; z-index: 1;
+      width: 100%; height: 100%; object-fit: cover;
+      background: #000;
+    }
+    #ar-canvas {
+      position: absolute; inset: 0; z-index: 2;
+      width: 100%; height: 100%;
+    }
+    .ar-frame { position:absolute; inset:0; pointer-events:none; z-index: 3; }
+    .ar-frame svg { width:100%; height:100%; }
+
+    .ar-ui {
+      position: absolute; inset: 0; pointer-events: none; z-index: 25;
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 2rem 1.5rem;
+      padding-top: max(2rem, env(safe-area-inset-top));
+      padding-bottom: max(2rem, env(safe-area-inset-bottom));
+    }
+    .ar-top { display:flex; justify-content:space-between; align-items:flex-start; }
+    .ar-label { font-family:'Inter',sans-serif; font-size:.65rem; letter-spacing:.3em; color:rgba(255,255,255,0.7); text-transform:uppercase; }
+    .ar-close-btn {
+      pointer-events:all;
+      background:rgba(0,0,0,.4); border:1px solid rgba(230,140,175,.4);
+      color:#ffffff; font-family:'Inter',sans-serif; font-size:.6rem;
+      letter-spacing:.25em; text-transform:uppercase; padding:.6rem 1.2rem;
+      cursor:pointer; backdrop-filter:blur(6px); transition:background .3s;
+    }
+    .ar-close-btn:hover { background:rgba(230,140,175,.15); }
+    .ar-bottom { display:flex; flex-direction:column; align-items:center; gap:1.2rem; }
+    .ar-hint { font-family:'Inter',sans-serif; font-style:normal; font-size:clamp(.9rem,3vw,1.1rem); color:rgba(255,255,255,0.5); letter-spacing:.05em; text-align:center; }
+    .ar-back-btn {
+      pointer-events: all;
+      background: rgba(0,0,0,.5); border: 1px solid rgba(230,140,175,.5);
+      color: #ffffff; font-family:'Inter',sans-serif; font-size:.65rem;
+      letter-spacing:.25em; text-transform:uppercase; padding:.8rem 2rem;
+      cursor:pointer; backdrop-filter:blur(8px); transition:background .3s, border-color .3s;
+      display:flex; align-items:center; gap:.6rem;
+    }
+    .ar-back-btn:hover,.ar-back-btn:active { background:rgba(255,255,255,.1); border-color:#fff; }
+
+    #ar-permission {
+      position:absolute; inset:0; background:rgba(10,5,8,.95);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:1.5rem; padding:2rem; text-align:center; z-index:5;
+    }
+    #ar-permission.gone { display:none; }
+    .perm-icon { opacity:.6; }
+    .perm-title { font-family:'Inter',sans-serif; font-size:1rem; letter-spacing:.2em; color:#ffffff; }
+    .perm-text { font-size:1rem; color:rgba(255,255,255,0.6); line-height:1.6; max-width:280px; }
+    .perm-btn {
+      background:none; border:1px solid rgba(255,255,255,.5); color:#ffffff;
+      font-family:'Inter',sans-serif; font-size:.65rem; letter-spacing:.3em;
+      text-transform:uppercase; padding:.9rem 2.4rem; cursor:pointer; transition:background .3s;
+    }
+    .perm-btn:hover { background:rgba(230,140,175,.1); }
+    .perm-back {
+      background:none; border:none; color:rgba(255,255,255,.45);
+      font-family:'Inter',sans-serif; font-size:.6rem; letter-spacing:.25em;
+      text-transform:uppercase; cursor:pointer; padding:.4rem 1rem;
+      transition:color .3s;
+    }
+    .perm-back:hover { color:#ffffff; }
+    .perm-err { color:rgba(255,120,80,.8); font-size:.85rem; display:none; }
+  </style>
+</head>
+<body>
+
+<!-- AFFIRMATION VIEW -->
+<div class="view" id="view-affirmation">
+  <div class="bg">
+    <div class="bg-gradient"></div>
+    <div class="warm-glow"></div>
+    <div class="center-glow"></div>
+    <div class="bg-noise"></div>
+    <div class="orb-wrap"><div class="orb"></div></div>
+    <div class="rays-svg"><svg id="rays-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><g id="rays-g" transform="translate(200,200)"></g></svg></div>
+    <canvas id="aff-canvas"></canvas>
+  </div>
+
+  <div class="corner tl"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38L2 2L38 2" stroke="#ffffff" stroke-width=".8"/><path d="M2 12L12 2" stroke="#ffffff" stroke-width=".5" opacity=".5"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38L2 2L38 2" stroke="#ffffff" stroke-width=".8"/><path d="M2 12L12 2" stroke="#ffffff" stroke-width=".5" opacity=".5"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38L2 2L38 2" stroke="#ffffff" stroke-width=".8"/><path d="M2 12L12 2" stroke="#ffffff" stroke-width=".5" opacity=".5"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38L2 2L38 2" stroke="#ffffff" stroke-width=".8"/><path d="M2 12L12 2" stroke="#ffffff" stroke-width=".5" opacity=".5"/></svg></div>
+
+  <div class="stage">
+    <div class="affirmation-box">
+      <div id="aff-glow"></div>
+      <p id="affirmation" class="hidden"></p>
+    </div>
+  </div>
+  <div class="headlines">
+    <p class="eyebrow">The Eye Sees You</p>
+    <p class="eyebrow-sub">Selflove</p>
+  </div>
+
+  <div class="bottom-btns">
+    <button class="sound-fab" id="sound-toggle" onclick="toggleSound()" title="Toggle sound">
+      <svg id="sound-icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      </svg>
+      <svg id="sound-icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" style="display:none">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+      </svg>
+      <span id="sound-label">tap to sound</span>
+    </button>
+    <p class="daily-hint">Come back every day for new affirmations.</p>
+  </div>
+
+  <div class="footer">© 2026 &nbsp;Digital Bohemians &nbsp;·&nbsp; All rights reserved</div>
+
+</div><!-- end view-affirmation -->
+<div class="view hidden" id="view-ar">
+  <video id="ar-video" autoplay playsinline muted></video>
+  <canvas id="ar-canvas"></canvas>
+
+  <div class="ar-frame">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 18L5 5L18 5"  stroke="rgba(201,168,76,0.45)" stroke-width=".35" fill="none"/>
+      <path d="M82 5L95 5L95 18" stroke="rgba(201,168,76,0.45)" stroke-width=".35" fill="none"/>
+      <path d="M5 82L5 95L18 95" stroke="rgba(201,168,76,0.45)" stroke-width=".35" fill="none"/>
+      <path d="M95 82L95 95L82 95" stroke="rgba(201,168,76,0.45)" stroke-width=".35" fill="none"/>
+      <circle cx="50" cy="50" r="5" stroke="rgba(201,168,76,0.2)" stroke-width=".25" fill="none"/>
+      <line x1="50" y1="44" x2="50" y2="41" stroke="rgba(201,168,76,0.2)" stroke-width=".2"/>
+      <line x1="50" y1="56" x2="50" y2="59" stroke="rgba(201,168,76,0.2)" stroke-width=".2"/>
+      <line x1="44" y1="50" x2="41" y2="50" stroke="rgba(201,168,76,0.2)" stroke-width=".2"/>
+      <line x1="56" y1="50" x2="59" y2="50" stroke="rgba(201,168,76,0.2)" stroke-width=".2"/>
+    </svg>
+  </div>
+
+  <div id="ar-permission" class="gone">
+    <div class="perm-icon">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="rgba(201,168,76,.8)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+    </div>
+    <p class="perm-title">Open the Vision</p>
+    <p class="perm-text">Allow camera access to see light and energy flowing around the sculpture.</p>
+    <button class="perm-btn" onclick="startCamera()">Allow Camera</button>
+    <button class="perm-back" onclick="closeAR()">← Back</button>
+    <p class="perm-err" id="perm-err">Camera access was denied. Please allow it in your browser settings.</p>
+  </div>
+
+  <div class="ar-ui">
+    <div class="ar-top">
+      <span class="ar-label">Light Vision</span>
+      <button class="ar-close-btn" onclick="closeAR()">✕ &nbsp;Close</button>
+    </div>
+    <div class="ar-bottom">
+      <p class="ar-hint">Point toward the sculpture</p>
+      <button class="ar-back-btn" onclick="closeAR()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
+        </svg>
+        Back to Affirmations
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ══ AFFIRMATIONS ══ */
+const affirmations = [
+  "I welcome new chapters.",
+  "I trust abundance is natural.",
+  "I deserve beautiful experiences.",
+  "I step into my leadership.",
+  "I hold space for my healing.",
+  "I attract kindness.",
+  "I trust divine protection.",
+  "I take up space with love.",
+  "I am proud of how far I've come.",
+  "I choose joy today.",
+  "My self-worth is unconditional.",
+  "I welcome glowing confidence.",
+  "I am open to expansion.",
+  "I welcome soul healing.",
+  "I trust my soul's purpose.",
+  "I radiate empowered love.",
+  "I embody magnetic positivity.",
+  "I speak to myself with love.",
+  "I welcome synchronicity.",
+  "I am connected to infinite possibility.",
+  "I choose uplifting thoughts.",
+  "I choose to see myself through the eyes of compassion.",
+  "I surrender into trust.",
+  "I am aligned with celebration.",
+  "I am ready for aligned success.",
+  "I trust the journey ahead.",
+  "I trust joyful expansion.",
+  "I release fear into light.",
+  "I release fear of judgment.",
+  "I am enough in every moment.",
+  "I welcome loving expansion.",
+  "I am aligned with purpose.",
+  "I surrender fear with compassion.",
+  "My heart expands with gratitude.",
+  "I attract joyful experiences.",
+  "I trust life's intelligence.",
+  "I welcome laughter.",
+  "I believe in limitless potential.",
+  "I celebrate my growth.",
+  "I am divinely supported.",
+  "I trust life's generosity.",
+  "I attract loving connections.",
+  "I attract empowering experiences.",
+  "I give myself permission to be happy.",
+  "I welcome inspired living.",
+  "I am committed to my vision.",
+  "I trust radiant outcomes.",
+  "I trust intuitive nudges.",
+  "I align with trust.",
+  "I believe in my worth.",
+  "I forgive myself with grace and softness.",
+  "I celebrate vibrant life.",
+  "I am aligned with my highest self.",
+  "I trust the flow of giving and receiving.",
+  "I honor my ambitions.",
+  "I trust my resilience.",
+  "I welcome miracles into my life.",
+  "I move with inspired intention.",
+  "I trust joyful creation.",
+  "I allow divine inspiration.",
+  "I welcome prosperity.",
+  "I am grateful for this moment.",
+  "I choose faith over fear.",
+  "I choose delight.",
+  "I radiate light wherever I go.",
+  "I welcome divine presence.",
+  "I welcome playful energy.",
+  "I am committed to my growth.",
+  "I trust my heart's truth.",
+  "I welcome divine timing.",
+  "I allow myself to feel fully.",
+  "I welcome positive change.",
+  "I attract positive transformation.",
+  "I welcome aligned success.",
+  "I welcome abundance with gratitude.",
+  "I treat myself with kindness and respect.",
+  "I am aligned with possibility.",
+  "I rise stronger each day.",
+  "I celebrate inner harmony.",
+  "I align with peace and purpose.",
+  "I trust happiness expands.",
+  "I am guided by divine intelligence.",
+  "I am supported beyond what I see.",
+  "I trust inner peace.",
+  "I choose empowered thoughts.",
+  "I trust intuitive wisdom.",
+  "I am guided by inner wisdom.",
+  "I attract vibrant opportunities.",
+  "I am love, I am light, I am enough.",
+  "I honor my inner child.",
+  "I welcome inner stillness.",
+  "I radiate gratitude.",
+  "I allow miracles daily.",
+  "I am confident in my abilities.",
+  "I am open to miracles.",
+  "I choose strength in uncertainty.",
+  "I welcome abundance.",
+  "I celebrate everyday magic.",
+  "I am guided by purpose.",
+  "I am open to divine guidance.",
+  "I allow myself to be seen.",
+  "I surrender with grace.",
+  "I align with truth.",
+  "I am supported energetically.",
+  "My voice matters.",
+  "I welcome inspired ideas.",
+  "I am becoming more confident every day.",
+  "I am whole and complete within.",
+  "I choose to see my beauty.",
+  "I release self-doubt gently.",
+  "I attract supportive opportunities.",
+  "I move through challenges gracefully.",
+  "I am a magnet for positive energy.",
+  "I welcome soul expansion.",
+  "I trust that everything is working out.",
+  "I welcome soulful fulfillment.",
+  "I welcome sacred transformation.",
+  "I trust the magic of beginnings.",
+  "I trust universal support.",
+  "I align with joyful purpose.",
+  "I trust my unique gifts.",
+  "I am safe to be my authentic self.",
+  "I welcome powerful transformation.",
+  "I embrace my sacred journey.",
+  "I celebrate life's miracles.",
+  "I deserve joy and softness.",
+  "I am learning to love myself more each day.",
+  "I trust my intuitive knowing.",
+  "I stand in my truth with grace.",
+  "I align with divine love.",
+  "I welcome higher awareness.",
+  "I release the need to be perfect.",
+  "I trust beautiful unfolding.",
+  "I move forward with courage.",
+  "I radiate positivity.",
+  "I celebrate my uniqueness.",
+  "I welcome vibrant energy.",
+  "I am worthy of recognition.",
+  "I allow love to move through me.",
+  "I let love guide my choices.",
+  "I welcome creative inspiration.",
+  "I trust myself to make aligned decisions.",
+  "I trust the unfolding of my life.",
+  "I create from inspiration.",
+  "I am aligned with love.",
+  "I am open to breakthroughs.",
+  "I allow success with ease.",
+  "I am worthy of love exactly as I am.",
+  "I am open to blessings.",
+  "I am aligned with higher truth.",
+  "I welcome meaningful success.",
+  "I am powerful beyond my fears.",
+  "I celebrate life's beauty.",
+  "I lead with authenticity.",
+  "I trust love's direction.",
+  "I trust the healing process.",
+  "I choose peace within.",
+  "My heart is open to giving and receiving love.",
+  "I believe in new beginnings.",
+  "I am deeply lovable.",
+  "I welcome playful creativity.",
+  "I radiate inspired action.",
+  "I welcome spiritual clarity.",
+  "I welcome heart-led abundance.",
+  "I transform fear into growth.",
+  "I welcome divine clarity.",
+  "I release resistance and allow flow.",
+  "I align with my highest path.",
+  "I trust abundance flows freely.",
+  "I flow with life's rhythm.",
+  "I am grounded in self-respect.",
+  "I nourish my mind with loving thoughts.",
+  "I welcome limitless joy.",
+  "I give myself permission to grow.",
+  "I release fear of failure.",
+  "I embody courage.",
+  "I trust the power of intention.",
+  "I welcome spiritual grounding.",
+  "I am aligned with success.",
+  "I surrender into peace.",
+  "I release attachment to outcomes.",
+  "I create opportunities through faith.",
+  "I am becoming unstoppable in love.",
+  "I am guided by love.",
+  "I am focused and clear.",
+  "I stand tall in my truth.",
+  "I welcome loving prosperity.",
+  "I release old stories that limit me.",
+  "I allow love to transform me.",
+  "I am open to new possibilities.",
+  "I choose progress over perfection.",
+  "I am in harmony with life.",
+  "I attract peaceful prosperity.",
+  "I choose faith in my path.",
+  "I trust the wisdom of surrender.",
+  "I allow inner guidance to lead.",
+  "I align with universal harmony.",
+  "I attract uplifting environments.",
+  "I act with inner confidence.",
+  "I am connected to universal love.",
+  "I welcome heartfelt joy.",
+  "I trust joyful evolution.",
+  "I attract empowering connections.",
+  "I am resilient and adaptable.",
+  "My presence is valuable and meaningful.",
+  "I welcome heart-opening experiences.",
+  "My soul knows the way.",
+  "I align with higher frequency.",
+  "I welcome spiritual awakening.",
+  "I believe in my dreams.",
+  "I trust the unfolding path.",
+  "I choose to rise in love.",
+  "I trust joyful timing.",
+  "I celebrate soulful connections.",
+  "I trust sacred timing.",
+  "I am supported by life.",
+  "I welcome radiant health.",
+  "I am grounded and focused.",
+  "I embody gratitude.",
+  "I am allowed to change.",
+  "I welcome inner alignment.",
+  "I take empowered steps daily.",
+  "I am gentle with my healing process.",
+  "I allow joy to guide me.",
+  "I am held by universal love.",
+  "I deserve rest and renewal.",
+  "I allow grace to lead me.",
+  "I radiate confidence and grace.",
+  "I surrender with trust.",
+  "I welcome self-trust.",
+  "I trust unseen support.",
+  "I honor my sensitivity as strength.",
+  "I trust my creative power.",
+  "I act from inner clarity.",
+  "I am worthy of deep connection.",
+  "I radiate confidence.",
+  "I trust loving guidance.",
+  "I release the need to force outcomes.",
+  "I show up with confidence.",
+  "I attract loving outcomes.",
+  "I trust divine timing.",
+  "I welcome love into every cell of my body.",
+  "I align with infinite love.",
+  "I am proud of my authenticity.",
+  "I align with spiritual joy.",
+  "I allow myself to shine unapologetically.",
+  "I rest in the knowing that I am enough.",
+  "I trust my sacred path.",
+  "I feel safe within myself.",
+  "I choose faith in uncertainty.",
+  "I welcome self-acceptance into my life.",
+  "I release comparison and embrace uniqueness.",
+  "I am open to sacred surprises.",
+  "I welcome beautiful synchronicities.",
+  "I trust my growth edge.",
+  "I am aligned with universal flow.",
+  "I surrender control and trust the universe.",
+  "I radiate inner harmony.",
+  "I align with peace.",
+  "I accept myself fully.",
+  "I am aligned with happiness.",
+  "I embrace my light and my shadow.",
+  "I expand beyond limitations.",
+  "I am guided step by step.",
+  "I welcome spiritual growth.",
+  "I embrace my inner power.",
+  "I release worry into faith.",
+  "I celebrate aligned growth.",
+  "I celebrate joyful freedom.",
+  "I welcome gentle transformation.",
+  "I embody inner strength.",
+  "I am capable of creating change.",
+  "I welcome radiant possibilities.",
+  "I release fear into the light.",
+  "I trust radiant flow.",
+  "I take inspired action.",
+  "I honor my journey and trust its timing.",
+  "I welcome creative flow.",
+  "I am open to delightful surprises.",
+  "I trust my instincts.",
+  "I welcome inner illumination.",
+  "I welcome divine abundance.",
+  "I embrace bold choices.",
+  "I celebrate who I am becoming.",
+  "I celebrate new opportunities.",
+  "I trust my ability to adapt.",
+  "I am fearless in love.",
+  "I trust my path even when unclear.",
+  "I trust my inner voice.",
+  "I honor my needs without guilt.",
+  "I trust sacred unfolding.",
+  "I celebrate small victories.",
+  "I embody luminous energy.",
+  "I welcome emotional freedom.",
+  "I am learning through love.",
+  "I am ready to receive success.",
+  "I trust the wisdom of experience.",
+  "I honor my determination.",
+  "I choose love over self-judgment.",
+  "I deserve healthy boundaries.",
+];
+
+
+
+
+
+let lastIndex = -1;
+function getRandom() {
+  let idx;
+  do { idx = Math.floor(Math.random() * affirmations.length); } while (idx === lastIndex && affirmations.length > 1);
+  lastIndex = idx;
+  return affirmations[idx];
+}
+
+/* Adaptive font size + glow based on text length + screen size */
+function adaptAffirmationSize(el) {
+  const len = el.textContent.length;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  // Orb is min(70vw, 70vh) — text box is min(58vw, 58vh), safe inner area ~52vw/52vh
+  const orbPx = Math.min(vw * 0.7, vh * 0.7);
+  const safeW = orbPx * 0.78; // usable width inside circle
+
+  // Base font size from screen
+  let base = vw < 380 ? 1.05 : vw < 480 ? 1.15 : vw < 640 ? 1.3 : 1.6;
+  // Scale down for longer texts
+  if      (len > 75) base *= 0.72;
+  else if (len > 60) base *= 0.82;
+  else if (len > 45) base *= 0.91;
+  else if (len > 30) base *= 0.97;
+  const size = Math.min(base, 2.2);
+  el.style.fontSize = size + 'rem';
+
+  // Estimate line count: approx chars per line based on font size + safe width
+  // ~1 rem ≈ 16px, average char width ≈ 0.52em
+  const fontPx = size * 16;
+  const charsPerLine = Math.floor(safeW / (fontPx * 0.52));
+  const lines = Math.ceil(len / Math.max(charsPerLine, 1));
+
+  // Glow: 1 line → narrow ellipse, 2+ lines → wider
+  const glow = document.getElementById('aff-glow');
+  if (glow) {
+    const glowW = lines <= 1 ? safeW * 0.65 : safeW * 1.05;
+    const glowH = lines <= 1 ? fontPx * 2.2 : fontPx * (lines * 1.65 + 0.8);
+    glow.style.width  = Math.round(glowW) + 'px';
+    glow.style.height = Math.round(glowH) + 'px';
+  }
+
+  // Max-width: keep text inside orb circle
+  // For a circle of radius r, chord at height h from center has width 2*sqrt(r²-h²)
+  // We use safeW directly as the constraint
+  el.style.maxWidth = Math.round(safeW) + 'px';
+}
+
+function nextAffirmation() {
+  const el = document.getElementById('affirmation');
+  const text = getRandom();
+  if (el.classList.contains('hidden')) {
+    el.textContent = text;
+    adaptAffirmationSize(el);
+    el.classList.remove('hidden');
+    requestAnimationFrame(() => el.classList.add('fade-in'));
+  } else {
+    el.classList.add('fade-out');
+    setTimeout(() => {
+      el.textContent = text;
+      adaptAffirmationSize(el);
+      el.classList.remove('fade-out','fade-in');
+      void el.offsetWidth; el.classList.add('fade-in');
+    }, 1200);
+  }
+}
+setTimeout(() => nextAffirmation(), 1600);
+window.addEventListener('resize', () => {
+  const el = document.getElementById('affirmation');
+  if (el && el.textContent) adaptAffirmationSize(el);
+});
+
+/* Rays */
+const rg = document.getElementById('rays-g');
+for (let i = 0; i < 24; i++) {
+  const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+  l.setAttribute('x1','0'); l.setAttribute('y1','0');
+  l.setAttribute('x2','0'); l.setAttribute('y2','-195');
+  l.setAttribute('stroke','#ffffff'); l.setAttribute('opacity', i%3===0 ? '0.35' : '0.18');
+  l.setAttribute('stroke-width', i%3===0?'1.5':'0.7');
+  l.setAttribute('transform',`rotate(${(360/24)*i})`);
+  rg.appendChild(l);
+}
+
+/* Affirmation bg particles — bidirectional */
+(function(){
+  const canvas = document.getElementById('aff-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, pts = [];
+  function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+
+  function mkP(dirOverride){
+    const cx=W/2, cy=H*.48, sp=Math.min(W,H)*.28;
+    // dir: 1 = up, -1 = down
+    const dir = dirOverride !== undefined ? dirOverride : (Math.random() < 0.5 ? 1 : -1);
+    return {
+      x: cx+(Math.random()-.5)*sp*2,
+      y: cy+(Math.random()-.5)*sp,
+      r: Math.random()*1.8+.3,
+      speed: Math.random()*.45+.08,
+      dir: dir,
+      alpha: 0,
+      maxAlpha: Math.random()*.7+.15,
+      life: 0,
+      maxLife: Math.random()*320+140,
+      dx: (Math.random()-.5)*.25
+    };
+  }
+
+  // Seed half up, half down
+  for(let i=0;i<80;i++){
+    const p=mkP(i < 40 ? 1 : -1);
+    p.life=Math.random()*p.maxLife;
+    pts.push(p);
+  }
+
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach((p,i)=>{
+      p.life++;
+      p.x += p.dx;
+      p.y -= p.speed * p.dir;  // dir: +1 up, -1 down
+      const t=p.life/p.maxLife;
+      p.alpha=t<.15?(t/.15)*p.maxAlpha:t>.75?((1-t)/.25)*p.maxAlpha:p.maxAlpha;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${p.alpha})`; ctx.fill();
+      // Out of bounds or life ended — respawn same direction
+      if(p.life>=p.maxLife || p.y < -20 || p.y > H+20) pts[i]=mkP(p.dir);
+    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+
+/* ══ AUDIO ENGINE ══ */
+let soundEnabled = true;
+let audioUnlocked = false;
+const audio = new Audio('DigitalWave.mp3');
+audio.loop = true;
+audio.volume = 0.7;
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  const btn = document.getElementById('sound-toggle');
+  document.getElementById('sound-icon-on').style.display  = soundEnabled ? 'block' : 'none';
+  document.getElementById('sound-icon-off').style.display = soundEnabled ? 'none'  : 'block';
+  document.getElementById('sound-label').textContent = soundEnabled ? 'sound on' : 'sound off';
+  btn.classList.toggle('active', soundEnabled);
+  if (!soundEnabled) {
+    audio.pause();
+  } else {
+    audio.play().catch(e => console.warn('Audio play error:', e));
+  }
+}
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  try {
+    if (soundEnabled && audio) {
+      const p = audio.play();
+      if (p && p.then) {
+        p.then(() => {
+          const lbl = document.getElementById('sound-label');
+          const btn = document.getElementById('sound-toggle');
+          if (lbl) lbl.textContent = 'sound on';
+          if (btn) btn.classList.add('active');
+        }).catch(() => {});
+      }
+    }
+  } catch(e) {}
+}
+document.addEventListener('touchstart', unlockAudio, { once: true });
+document.addEventListener('click', function onFirstClick() {
+  unlockAudio();
+  document.removeEventListener('click', onFirstClick);
+});
+
+// Kept for compatibility — AR open/close just let the same audio keep playing
+function startHeartbeat() {}
+function stopHeartbeat() {}
+function stopGongLoop() {}
+
+/* ══ AR MODE ══ */
+let arStream = null;
+let arAnimId = null;
+
+function openAR() {
+  const arView = document.getElementById('view-ar');
+  arView.style.background = '#000';
+  document.getElementById('view-affirmation').classList.add('hidden');
+  arView.classList.remove('hidden');
+  startHeartbeat();
+  startCamera();
+}
+
+function closeAR() {
+  document.getElementById('view-ar').classList.add('hidden');
+  document.getElementById('view-affirmation').classList.remove('hidden');
+  if (arStream) { arStream.getTracks().forEach(t => t.stop()); arStream = null; }
+  if (arAnimId) { cancelAnimationFrame(arAnimId); arAnimId = null; }
+  stopHeartbeat();
+}
+
+async function startCamera() {
+  document.getElementById('perm-err').style.display = 'none';
+  const attempts = [
+    { video: { facingMode: { ideal: 'environment' }, width:{ideal:1920}, height:{ideal:1080} }, audio: false },
+    { video: { facingMode: 'user' }, audio: false },
+    { video: true, audio: false },
+  ];
+  for (const c of attempts) {
+    try {
+      arStream = await navigator.mediaDevices.getUserMedia(c);
+      const video = document.getElementById('ar-video');
+      video.srcObject = arStream;
+      await video.play();
+      document.getElementById('ar-permission').classList.add('gone');
+      initARCanvas();
+      return;
+    } catch(e) { /* try next */ }
+  }
+  // All attempts failed — show permission screen with error
+  document.getElementById('ar-permission').classList.remove('gone');
+  const err = document.getElementById('perm-err');
+  err.textContent = 'Camera access was denied. Please allow it in your browser settings.';
+  err.style.display = 'block';
+}
+
+function initARCanvas() {
+  const canvas = document.getElementById('ar-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  function resize() {
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  window.addEventListener('resize', resize); resize();
+
+  const G  = (a) => `rgba(229,107,138,${a})`;
+  const WH = (a) => `rgba(255,180,210,${a})`;
+
+  /* ── Floating particles ── */
+  const particles = [];
+  function mkParticle() {
+    const spread = Math.random();
+    const x = spread < .7
+      ? W*.5 + (Math.random()-.5)*W*.55
+      : Math.random()*W;
+    const y = spread < .7
+      ? H*.55 + (Math.random()-.5)*H*.45
+      : Math.random()*H;
+    return {
+      x, y,
+      r: Math.random()*2.2+.4,
+      vy: -(Math.random()*.5+.08),
+      vx: (Math.random()-.5)*.2,
+      life: 0,
+      maxLife: Math.random()*440+180,
+      maxAlpha: Math.random()*.75+.12,
+      alpha: 0,
+      star: Math.random() < .22,
+      twinkle: Math.random()*Math.PI*2,
+    };
+  }
+  for (let i=0;i<100;i++){const p=mkParticle();p.life=Math.random()*p.maxLife;particles.push(p);}
+
+  /* ── Pulsing rings ── */
+  const rings = [];
+  function mkRing() {
+    return {
+      x: W*.3 + Math.random()*W*.4,
+      y: H*.25 + Math.random()*H*.45,
+      r: 0,
+      targetR: Math.random()*Math.min(W,H)*.2 + 28,
+      speed: Math.random()*.35+.12,
+      alpha: 0,
+      phase: 'grow',
+      holdT: 0,
+      maxHold: Math.random()*90+40,
+      thick: Math.random()*1.1+.3,
+    };
+  }
+  for(let i=0;i<7;i++){const r=mkRing();r.r=r.targetR*Math.random()*.9;rings.push(r);}
+
+  /* ── Light streaks ── */
+  const streaks = [];
+  function mkStreak() {
+    const angle = Math.random()*Math.PI*2;
+    return {
+      cx: W*.28+Math.random()*W*.44,
+      cy: H*.22+Math.random()*H*.54,
+      angle,
+      len: Math.random()*130+35,
+      life: 0,
+      maxLife: Math.random()*200+70,
+      maxAlpha: Math.random()*.5+.08,
+      alpha: 0,
+      width: Math.random()*1.4+.25,
+      drift: (Math.random()-.5)*.003,
+    };
+  }
+  for(let i=0;i<14;i++){const s=mkStreak();s.life=Math.random()*s.maxLife;streaks.push(s);}
+
+  function drawStar(x, y, r, a) {
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.strokeStyle = G(1);
+    ctx.lineWidth = .5;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = G(.6);
+    ctx.translate(x, y);
+    for(let i=0;i<4;i++){
+      ctx.beginPath(); ctx.moveTo(0,-r*1.7); ctx.lineTo(0,r*1.7); ctx.stroke();
+      ctx.rotate(Math.PI/4);
+    }
+    ctx.restore();
+  }
+
+  function loop() {
+    if (canvas.offsetWidth !== W || canvas.offsetHeight !== H) resize();
+    ctx.clearRect(0, 0, W, H);
+
+    /* Rings */
+    rings.forEach((rr, i) => {
+      if (rr.phase === 'grow') {
+        rr.r += rr.speed;
+        rr.alpha = Math.min(rr.alpha + .010, .52);
+        if (rr.r >= rr.targetR) rr.phase = 'hold';
+      } else if (rr.phase === 'hold') {
+        rr.holdT++;
+        if (rr.holdT >= rr.maxHold) rr.phase = 'fade';
+      } else {
+        rr.alpha -= .005;
+        rr.r += rr.speed * .35;
+        if (rr.alpha <= 0) rings[i] = mkRing();
+      }
+      ctx.save();
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = G(.35);
+      ctx.beginPath();
+      ctx.arc(rr.x, rr.y, rr.r, 0, Math.PI*2);
+      ctx.strokeStyle = G(rr.alpha);
+      ctx.lineWidth = rr.thick * 1.8;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(rr.x, rr.y, rr.r*1.05, 0, Math.PI*2);
+      ctx.strokeStyle = WH(rr.alpha * .28);
+      ctx.lineWidth = rr.thick * .5;
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    /* Streaks */
+    streaks.forEach((s, i) => {
+      s.life++; s.angle += s.drift;
+      const tt = s.life / s.maxLife;
+      s.alpha = tt < .15 ? (tt/.15)*s.maxAlpha
+              : tt > .7  ? ((1-tt)/.3)*s.maxAlpha
+              : s.maxAlpha;
+      const cos=Math.cos(s.angle), sin=Math.sin(s.angle);
+      const x1=s.cx-cos*(s.len/2), y1=s.cy-sin*(s.len/2);
+      const x2=s.cx+cos*(s.len/2), y2=s.cy+sin*(s.len/2);
+      const grad = ctx.createLinearGradient(x1,y1,x2,y2);
+      grad.addColorStop(0,   G(0));
+      grad.addColorStop(.2,  G(s.alpha));
+      grad.addColorStop(.5,  WH(s.alpha*.75));
+      grad.addColorStop(.8,  G(s.alpha));
+      grad.addColorStop(1,   G(0));
+      ctx.save();
+      ctx.shadowBlur = 14;
+      ctx.shadowColor = G(.4);
+      ctx.beginPath();
+      ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = s.width*2.2;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      ctx.restore();
+      if (s.life >= s.maxLife) streaks[i] = mkStreak();
+    });
+
+    /* Particles */
+    particles.forEach((p, i) => {
+      p.life++; p.x+=p.vx; p.y+=p.vy;
+      p.twinkle += .035;
+      const tr = p.life/p.maxLife;
+      p.alpha = tr<.12?(tr/.12)*p.maxAlpha : tr>.78?((1-tr)/.22)*p.maxAlpha : p.maxAlpha;
+      const ta = p.alpha * (.7 + .3*Math.sin(p.twinkle));
+      if (p.star && p.r > 1.2) {
+        drawStar(p.x, p.y, p.r*.7, ta*.85);
+      } else {
+        ctx.save();
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = G(.5);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fillStyle = G(ta);
+        ctx.fill();
+        if (p.r > 1.3) {
+          ctx.beginPath();
+          ctx.arc(p.x-.3, p.y-.3, p.r*.3, 0, Math.PI*2);
+          ctx.fillStyle = WH(ta*.55);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+      if (p.life >= p.maxLife || p.y < -20) particles[i] = mkParticle();
+    });
+
+    arAnimId = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+</script>
+</body>
+</html>
